@@ -5,6 +5,7 @@ from lib.menus import menu_principal, titulo_BFS, titulo_DFS, titulo_greedy, tit
 from src.rumania import esta_ciudad, BFS, DFS, greedy, A_estrella
 from src.frozenlake import fl_BFS, fl_DFS, fl_A
 from src.reinas import N_reinas
+from src.gato import partida_3_raya
 
 # Activar soporte ANSI (solo necesario en Windows)
 enable_ansi_escape()
@@ -210,9 +211,29 @@ def menu_minimax():
         clrscr()
         titulo_minimax()
         print("\n   Seleccionar el entorno.\n")
-        print("  1.- Mapa de Rumania")
+        print("  1.- Tres en raya")
         print("  2.- Salir")
         opcion = int(input("\n   Seleccione la opción deseada: "))
+        if(opcion == 1):
+            opcion2 = 0
+            while(opcion2 != 3):
+                clrscr()
+                titulo_minimax()
+                print("\n   Seleccionar el modo de juego.\n")
+                print("  1.- CPU invencible")
+                print("  2.- CPU que no gana")
+                print("  3.- Salir")
+                opcion2 = int(input("\n   Seleccione la opción deseada: "))
+                if(opcion2 == 1):
+                    imbatible = True
+                elif(opcion2 == 2):
+                    imbatible = False
+                if(opcion2 == 1 or opcion2 == 2):
+                    clrscr()
+                    titulo_minimax()
+                    partida_3_raya(imbatible, 55, 9)
+                    customForeground(255,135,191)
+                    input("\n   Presiona ENTER para continuar...\033[0m\n\n\n")
 
 opcion = 0
 while(opcion != 7):
