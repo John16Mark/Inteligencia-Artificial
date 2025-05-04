@@ -1,9 +1,10 @@
 from lib.consola import gotoxy, enable_ansi_escape, clrscr
 from lib.diseno import print_letra, colorDefault, customForeground
-from lib.menus import menu_principal, titulo_BFS, titulo_DFS, titulo_greedy, titulo_A
+from lib.menus import menu_principal, titulo_BFS, titulo_DFS, titulo_greedy, titulo_A, titulo_hill_climbing, titulo_minimax
 
 from src.rumania import esta_ciudad, BFS, DFS, greedy, A_estrella
-from src.frozenlake import fl_BFS, fl_DFS
+from src.frozenlake import fl_BFS, fl_DFS, fl_A
+from src.reinas import N_reinas
 
 # Activar soporte ANSI (solo necesario en Windows)
 enable_ansi_escape()
@@ -146,16 +147,24 @@ def menu_greedy():
 
 def menu_A():
     opcion = 0
-    while(opcion != 2):
+    while(opcion != 3):
         clrscr()
         titulo_A()
         print("\n   Seleccionar el entorno.\n")
-        print("  1.- Mapa de Rumania")
-        print("  2.- Salir")
+        print("  1.- Frozen Lake")
+        print("  2.- Mapa de Rumania")
+        print("  3.- Salir")
         opcion = int(input("\n   Seleccione la opción deseada: "))
 
-        # Mapa de Rumania
+        # Frozen Lake
         if (opcion == 1):
+            clrscr()
+            titulo_A()
+            fl_A()
+            customForeground(255,135,191)
+            input("\n   Presiona ENTER para continuar...\033[0m\n\n\n")
+        # Mapa de Rumania  
+        elif(opcion == 2):
             clrscr()
             titulo_A()
             print("\n   \033[93mCiudad de origen: \033[0mArad")
@@ -171,19 +180,35 @@ def menu_A():
 
 def menu_hill_c():
     opcion = 0
-    while(opcion != 2):
+    while(opcion != 3):
         clrscr()
-        titulo_greedy()
+        titulo_hill_climbing()
         print("\n   Seleccionar el entorno.\n")
         print("  1.- Mapa de Rumania")
-        print("  2.- Salir")
+        print("  2.- Las N Reinas")
+        print("  3.- Salir")
         opcion = int(input("\n   Seleccione la opción deseada: "))
+
+        if(opcion == 1):
+            print("1")
+        elif(opcion == 2):
+            clrscr()
+            titulo_hill_climbing()
+            print("\n   Seleccionar el tamaño del tablero.\n")
+            tam = int(input("\n   \033[93mTamaño: \033[0m"))
+
+            resultado = N_reinas(tam)
+            if(resultado == None):
+                print("\033[31mNo se puede llegar a una solución\033[0m")
+            customForeground(255,135,191)
+            input("\n   Presiona ENTER para continuar...\033[0m\n\n\n")
+
 
 def menu_minimax():
     opcion = 0
     while(opcion != 2):
         clrscr()
-        titulo_greedy()
+        titulo_minimax()
         print("\n   Seleccionar el entorno.\n")
         print("  1.- Mapa de Rumania")
         print("  2.- Salir")

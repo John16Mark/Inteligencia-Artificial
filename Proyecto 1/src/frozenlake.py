@@ -1,6 +1,7 @@
 import gymnasium as gym
 from gymnasium.envs.toy_text.frozen_lake import generate_random_map
 import pygame
+import heapq
 
 #######################################################################
 #                         FUNCIONES GENERALES
@@ -191,6 +192,118 @@ def fl_DFS():
     for i in range(len(ruta)-1):
         antes = ruta[i]
         depues = ruta[i+1]
+        accion = obtener_movimiento(antes, depues)
+        obs, reward, done, truncated, info = env.step(accion)
+        env.render()
+        if done:
+            break
+    env.close()
+
+#######################################################################
+#                              ALGORITMO A*
+#######################################################################
+
+def heuristica(casilla, final):
+    dx = abs(casilla[0] - final[0])
+    dy = abs(casilla[1] - final[1])
+    return dx+dy
+
+def A_rec(grafo, actual, final, cola, visitados, previos):
+    #cola.pop(0)
+    visitados.append(actual)
+    if(actual[1] == final):
+        print("\033[94mSe encontró ", actual[1], "\033[0m")
+        return True
+    print("\033[92mVisitamos ", actual[1], "\033[0m")
+    adyacentes = grafo.get(actual[1])
+    #print(adyacentes)
+    
+    for casilla in adyacentes:
+        # Si no hemos visitado ya la casilla
+        if casilla not in visitados:
+            # Si no está ya en las casillas por visitar, añadimos
+            if casilla not in [ciud for _, ciud in cola]:
+                print("\033[93mEncolamos ", casilla, " - g(x)=", adyacentes[casilla], " + h(x)=", heuristica(casilla, final), ": ", adyacentes[casilla] + heuristica(casilla, final),"\033[0m")
+                heapq.heappush(cola, (adyacentes[casilla] + heuristica(casilla, final), casilla))
+                previos.update({casilla: actual[1]})
+            # Si está en las casillas por visitar, comprobamos si la distancia es mejor
+            else:
+                print("\033[38;2;255;144;0mYa tenemos encolada ", casilla, "\033[0m")
+                
+                for i, (dist_temporal, casilla_temporal) in enumerate(cola):
+                    if casilla_temporal == casilla:
+                        if adyacentes[casilla] + heuristica(casilla, final) < dist_temporal + heuristica(casilla_temporal, final):
+                            print("\033[32mMejor distancia para, ", casilla, " desde ", actual[1], " - g(x)=", adyacentes[casilla], " + h(x)=", heuristica(casilla, final)," < ", dist_temporal + heuristica(casilla_temporal, final), "\033[0m")
+                            del cola[i]
+                            heapq.heapify(cola)
+                            heapq.heappush(cola, (adyacentes[casilla] + heuristica(casilla, final), casilla))
+                            previos[casilla] = actual[1]
+                        else:
+                            print("\033[31mLa distancia es peor: - g(x)=", adyacentes[casilla], " + h(x)=", heuristica(casilla, final)," > ", dist_temporal + heuristica(casilla_temporal, final))
+        else:
+            print("\033[91mYa visitamos ", casilla, " anteriormente\033[0m")
+    if(len(cola) == 0):
+        return False
+    #for e in cola:
+    #    print("\033[96m ", e[1], ": ", e[0], "\033[0m")
+    nuevo = heapq.heappop(cola)
+    visitados.append(nuevo[1])
+    #print("Nuevo: ", nuevo)
+    #print("Nuevo[0]: ", nuevo[0])
+    encontrado = A_rec(grafo, nuevo, final, cola, visitados, previos)
+    if(encontrado == True):
+        return True
+    print("\033[96mRegresamos de ", nuevo, "\033[0m")
+    return False
+
+def A_estrella(matriz):
+    grafo = construir_grafo(matriz)
+    inicial, final = obtener_inicial_y_final(matriz)
+    print("\033[93mInicial: \033[0m", inicial)
+    print("\033[93mFinal: \033[0m", final)
+
+    cola = []
+    visitados = [inicial]
+    previos = { inicial: None }
+    #cola.append((0, inicial))
+    resultado = A_rec(grafo, (0, inicial), final, cola, visitados, previos)
+    if(resultado == True):
+        distancia = 0
+        ruta = []
+        ruta.append(final)
+        siguiente = previos.get(final)
+        if(siguiente != None):
+            distancia += grafo[siguiente][final]
+        while(siguiente != None):
+            ruta.insert(0, siguiente)
+            anterior = siguiente
+            siguiente = previos.get(siguiente)
+            if(siguiente != None):
+                distancia += grafo[siguiente][anterior]
+        return ruta, distancia
+    else:
+        return None, None
+    
+def fl_A():
+    if(tipo_mapa == 0):
+        env = gym.make("FrozenLake-v1", is_slippery=False, render_mode="human")
+    elif(tipo_mapa == 1):
+        env = gym.make("FrozenLake-v1", is_slippery=False, render_mode="human", desc=mapa_personalizado)
+    else:
+        random_map = generate_random_map(size=6, p=0.9)
+        env = gym.make("FrozenLake-v1", is_slippery=False, render_mode="human", desc=random_map)
+    matriz = env.unwrapped.desc
+
+    ruta = A_estrella(matriz)
+    if(ruta == None):
+        print("\033[31mNo se encontró el oro\033[0m")
+    else:
+        print("\n\033[95mRuta: \033[0m", ruta[0])
+    
+    obs, info = env.reset()
+    for i in range(len(ruta[0])-1):
+        antes = ruta[0][i]
+        depues = ruta[0][i+1]
         accion = obtener_movimiento(antes, depues)
         obs, reward, done, truncated, info = env.step(accion)
         env.render()

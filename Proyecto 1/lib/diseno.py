@@ -542,7 +542,15 @@ def print_letra(letra, x, y, color1, color2, color3):
         colorForeground("negro")
         gotoxy(x, y+2)
         print("▄█▄█▄")
-        gotoxy(x,y+5)
+        gotoxy(x,y+4)
+        print("")
+    elif (letra == '-'):
+        customForeground(color2[0], color2[1], color2[2])
+        gotoxy(x+1, y+2)
+        print("▀▀▀")
+        colorForeground("negro")
+        gotoxy(x,y+4)
+        print("")
     colorDefault()
     
         

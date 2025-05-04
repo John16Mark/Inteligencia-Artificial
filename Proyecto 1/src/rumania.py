@@ -161,7 +161,7 @@ def greedy(inicial, final):
 #                              ALGORITMO A*
 #######################################################################
 
-def A_rec(actual, final, cola, visitados, previos, distancia):
+def A_rec(actual, final, cola, visitados, previos):
     #cola.pop(0)
     visitados.append(actual)
     if(actual[1] == final):
@@ -169,7 +169,7 @@ def A_rec(actual, final, cola, visitados, previos, distancia):
         return True
     print("\033[92mVisitamos ", actual[1], "\033[0m")
     adyacentes = grafo.get(actual[1])
-    print(adyacentes)
+    #print(adyacentes)
     
     for ciudad in adyacentes:
         # Si no hemos visitado ya la ciudad
@@ -197,13 +197,13 @@ def A_rec(actual, final, cola, visitados, previos, distancia):
             print("\033[91mYa visitamos ", ciudad, " anteriormente\033[0m")
     if(len(cola) == 0):
         return False
-    for e in cola:
-        print("\033[96m ", e[1], ": ", e[0], "\033[0m")
+    #for e in cola:
+        #print("\033[96m ", e[1], ": ", e[0], "\033[0m")
     nuevo = heapq.heappop(cola)
     visitados.append(nuevo[1])
-    print("Nuevo: ", nuevo)
-    print("Nuevo[0]: ", nuevo[0])
-    encontrado = A_rec(nuevo, final, cola, visitados, previos, nuevo[0])
+    #print("Nuevo: ", nuevo)
+    #print("Nuevo[0]: ", nuevo[0])
+    encontrado = A_rec(nuevo, final, cola, visitados, previos)
     if(encontrado == True):
         return True
     print("\033[96mRegresamos de ", nuevo, "\033[0m")
@@ -214,7 +214,7 @@ def A_estrella(inicial, final):
     visitados = [inicial]
     previos = { inicial: None }
     #cola.append((0, inicial))
-    resultado = A_rec((0, inicial), final, cola, visitados, previos, 0)
+    resultado = A_rec((0, inicial), final, cola, visitados, previos)
     if(resultado == True):
         distancia = 0
         ruta = []
