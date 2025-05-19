@@ -2,7 +2,7 @@ from lib.consola import gotoxy, enable_ansi_escape, clrscr
 from lib.diseno import print_letra, colorDefault, customForeground
 from lib.menus import menu_principal, titulo_BFS, titulo_DFS, titulo_greedy, titulo_A, titulo_hill_climbing, titulo_minimax
 
-from src.rumania import esta_ciudad, BFS, DFS, greedy, A_estrella
+from src.rumania import esta_ciudad, BFS, DFS, greedy, A_estrella, hill_climbing
 from src.frozenlake import fl_BFS, fl_DFS, fl_A
 from src.reinas import N_reinas
 from src.gato import partida_3_raya
@@ -189,9 +189,39 @@ def menu_hill_c():
         print("  2.- Las N Reinas")
         print("  3.- Salir")
         opcion = int(input("\n   Seleccione la opción deseada: "))
-
+        #opcion = 1
         if(opcion == 1):
-            print("1")
+            clrscr()
+            titulo_hill_climbing()
+            print("\n   Seleccionar las ciudades.\n")
+            inicial = input("\n   \033[93mCiudad de origen: \033[0m")
+            #inicial = "Bucharest"
+            inicial = inicial.title()
+            # Si no existe la ciudad introducida
+            if(esta_ciudad(inicial) == False):
+                print("\033[91m\n   La ciudad ", inicial, " no se encuentra en el mapa.\033[0m")
+                customForeground(255,135,191)
+                input("\n   Presiona ENTER para continuar...\033[0m\n\n\n")
+            else:
+                final = input("   \033[93mCiudad destino: \033[0m")
+                #final = "Arad"
+                final = final.title()
+                # Si no existe la ciudad introducida
+                if(esta_ciudad(final) == False):
+                    print("\033[91m\n   La ciudad ", final, " no se encuentra en el mapa.\033[0m")
+                    customForeground(255,135,191)
+                    input("\n   Presiona ENTER para continuar...\033[0m\n\n\n")
+                else:
+                    clrscr()
+                    titulo_hill_climbing()  
+                    ruta, distancia = hill_climbing(inicial, final)
+                    if(ruta == None):
+                        print("\033[31mNo se llegó a la ciudad ", final, "\033[0m")
+                    else:
+                        print("\n\033[95mRuta: \033[0m", ruta)
+                        print("\033[95mDistancia recorrida: \033[0m", distancia)
+                    customForeground(255,135,191)
+                    input("\n   Presiona ENTER para continuar...\033[0m\n\n\n")
         elif(opcion == 2):
             clrscr()
             titulo_hill_climbing()
@@ -240,7 +270,7 @@ while(opcion != 7):
     clrscr()
     menu_principal()
     opcion = int(input("\n   Seleccione la opción deseada: "))
-    #opcion = 3
+    #opcion = 5
     if(opcion == 1):
         menu_BFS()
     elif(opcion == 2):

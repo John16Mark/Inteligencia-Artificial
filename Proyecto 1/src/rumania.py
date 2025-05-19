@@ -1,4 +1,6 @@
 import heapq
+from random import randint
+import random
 
 # Grafo representado con un diccionario
 grafo = {
@@ -169,7 +171,6 @@ def A_rec(actual, final, cola, visitados, previos):
         return True
     print("\033[92mVisitamos ", actual[1], "\033[0m")
     adyacentes = grafo.get(actual[1])
-    #print(adyacentes)
     
     for ciudad in adyacentes:
         # Si no hemos visitado ya la ciudad
@@ -197,12 +198,9 @@ def A_rec(actual, final, cola, visitados, previos):
             print("\033[91mYa visitamos ", ciudad, " anteriormente\033[0m")
     if(len(cola) == 0):
         return False
-    #for e in cola:
-        #print("\033[96m ", e[1], ": ", e[0], "\033[0m")
+
     nuevo = heapq.heappop(cola)
     visitados.append(nuevo[1])
-    #print("Nuevo: ", nuevo)
-    #print("Nuevo[0]: ", nuevo[0])
     encontrado = A_rec(nuevo, final, cola, visitados, previos)
     if(encontrado == True):
         return True
@@ -231,3 +229,89 @@ def A_estrella(inicial, final):
         return ruta, distancia
     else:
         return None, None
+
+#######################################################################
+#                            HILL-CLIMBING
+#######################################################################
+
+def hc_rec(actual, final, cola):
+    cola.append(actual)
+    print("\033[92mVisitamos ", actual, "\033[0m")
+    if(actual == final):
+        print("\033[94mSe encontró ", actual, "\033[0m")
+        return True
+    adyacentes = grafo.get(actual)
+    mejor = None
+    for ciudad in adyacentes:
+        if ciudad not in cola:
+            print("\033[93m", ciudad, " no está encolada\033[0m")
+            if(mejor == None or adyacentes[ciudad] < mejor[1]):
+                mejor = (ciudad, adyacentes[ciudad])
+        else:
+            print("\033[91mYa visitamos ", ciudad, " anteriormente\033[0m")
+    if(mejor == None):
+        return False
+    print("\033[33mCiudad más cercana: ", mejor[0], "\033[0m")
+    encontrado = hc_rec(mejor[0], final, cola)
+
+def hill_climbing(inicial, final):
+    cola = [inicial]
+    actual = inicial
+    intentos = 0
+    while(actual != final and intentos < 1000):
+        # Fase de seguir con la ruta
+        print("\033[92mVisitamos ", actual, "\033[0m")
+        adyacentes = grafo.get(actual)
+        mejor = None
+        for ciudad in adyacentes:
+            if ciudad not in cola:
+                print("\033[93m", ciudad, " no está encolada\033[0m")
+                if(mejor == None or adyacentes[ciudad] < mejor[1]):
+                    mejor = (ciudad, adyacentes[ciudad])
+            else:
+                print("\033[91mYa visitamos ", ciudad, " anteriormente\033[0m")
+        if(mejor != None):
+            actual = mejor[0]
+            cola.append(actual)
+        else:
+            # Fase de reseteo aleatorio
+            print("\033[91mEstamos atorados en: ", cola, "\033[0m")
+            intentos += 1
+            nuevo = None
+            while(nuevo == None):
+                if(len(cola)-2 == 0):
+                    indice = 0
+                else:
+                    indice = randint(0, len(cola)-2)
+                ciudad_de_reseteo = cola[indice]
+                ciudades = grafo.get(ciudad_de_reseteo)
+                
+                bloqueada = cola[indice+1]
+                ciudades_disponibles = [ciudad for ciudad in ciudades if ciudad != bloqueada and ciudad not in cola]
+                if(len(ciudades_disponibles) == 0):
+                    print("\033[91mNo se puede reiniciar desde ", ciudad_de_reseteo, "\033[0m")
+                    continue
+                actual = random.choice(ciudades_disponibles)
+                primera_mitad = cola[:indice+1]
+                cola = primera_mitad
+                cola.append(actual)
+                print("Reseteamos desde ", actual)
+                print("Nueva cola: ", cola)
+                break
+                
+
+
+    if(intentos >= 1000):
+        return None, None
+    else:
+        
+        distancia = 0
+        indice = 0
+        actual = cola[indice]
+        while(actual != final): 
+            ciudades = grafo.get(actual)
+            indice += 1
+            distancia += ciudades.get(cola[indice])
+            actual = cola[indice]
+        print(distancia)
+        return cola, distancia
